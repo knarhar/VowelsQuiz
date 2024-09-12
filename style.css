@@ -1,0 +1,190 @@
+.start-page {
+    text-align: center;
+    width: 45%;
+    margin: 19% auto 0;
+}
+
+.start-page p {
+    text-align: left;
+}
+
+.quiz-container {
+    display: none;
+}
+
+.main-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    max-width: 600px;
+    margin: auto;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+}
+
+.question-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.score-container {
+    font-size: 20px;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.result-container {
+
+    text-align: center;
+    margin-top: 20%;
+}
+
+.question {
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.audio-player i {
+    font-size: 50px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: .3s ease;
+}
+
+.audio-player i:hover {
+    background-color: #0056b3;
+    color: white;
+}
+
+.audio-player audio {
+    margin: 20px 0;
+    display: none;
+}
+
+#response {
+    opacity: 0;
+}
+
+#response.correct {
+    color: rgb(81, 176, 81);
+    font-weight: bold;
+}
+
+#response.incorrect {
+    color:rgb(255, 99, 71);
+    font-weight: bold;
+}
+
+#checked {
+    background-color: #d5d5d5;
+}
+
+.answers-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+}
+
+.answer {
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-align: center;
+    background-color: #ffffff;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 18px;
+}
+
+.answer:hover {
+    background-color: #f0f0f0;
+}
+
+.answer.correct {
+    background-color: rgb(81, 176, 81);
+    color: white;
+    opacity: .5;
+}
+
+.answer.incorrect {
+    background-color: rgb(255, 99, 71);
+    color: white;
+    opacity: .5;
+}
+
+.button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    width: 80px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 16px;
+}
+
+.button:hover {
+    background-color: #0056b3;
+}
+
+.try-again {
+    width: fit-content;
+}
+
+.timer {
+    margin: 10px 0;
+}
+
+/* Модальное окно */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 300px;
+    text-align: center;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    cursor: pointer;
+}
+
+
+
+@media only screen and (max-width: 450px) {
+    .result-container {
+        padding-top: 0;
+        height: 70vh;
+    }
+}

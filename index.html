@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+        integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="favicon.png">
+    <title>Vowel Quiz</title>
+    <style>
+    </style>
+</head>
+
+<body>
+
+    <div class="start-page">
+        <h1>Welcome to the Vowel Quiz!</h1>
+        <p>Test your knowledge of the International Phonetic Alphabet (<a href="javascript:void(0);"
+            onclick="window.open('https://en.wikipedia.org/wiki/IPA_vowel_chart_with_audio', '_blank',  'width=400px,height=600px,top=100px,left=500px');">
+            <abbr title="International Phonetic Alphabet">IPA</abbr></a>) by identifying vowel sounds. 
+            Listen carefully, choose the correct symbol, and improve your phonetic skills!</p>
+
+            <p>Press Play to start the quiz and challenge yourself with different vowel sounds.</p>
+        <button class="button" id="startQuizBtn">Play</button>
+    </div>
+
+
+    <div class="quiz-container">
+        <div class="main-container">
+            <div class="timer" id="timer">Time remaining: <span id="minutes">10</span>:<span id="seconds">00</span>
+            </div>
+            <div class="score-container">
+                Score: <span id="score">0</span>/10
+            </div>
+            <div id="questionContainer" class="question-container">
+                <div class="question">
+                    <h2>
+                        Match the <a href="javascript:void(0);"
+                            onclick="window.open('https://en.wikipedia.org/wiki/IPA_vowel_chart_with_audio', '_blank',  'width=400px,height=600px,top=100px,left=500px');">
+                            <abbr title="International Phonetic Alphabet">IPA</abbr></a> vowel:
+                    </h2>
+                </div>
+
+                <div class="audio-player">
+                    <i class="fa-solid fa-volume-high" id="audioIcon"></i>
+                    <audio id="audioPlayer" controls>
+                        <!-- The source will be set dynamically -->
+                    </audio>
+                </div>
+                <p id="response">Response</p>
+                <div class="answers-container" id="answersContainer">
+                    <!-- The answers will be generated dynamically -->
+                </div>
+
+                <button class="button" id="checkAnswerBtn">Check</button>
+                <button class="button" id="nextQuestionBtn" disabled>Next</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p id="modalText">Time is almost up! 1 minute left!</p>
+        </div>
+    </div>
+
+    <script>
+        String.Empty = "";
+
+        function $(selector) {
+            return document.querySelector(selector);
+        }
+
+        HTMLElement.prototype.on = function (event, action) {
+            this.addEventListener(event, action);
+
+            return this;
+        };
+
+        HTMLElement.prototype.click = function (action) {
+            this.addEventListener("click", action);
+
+            return this;
+        };
+
+        function swap(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+
+            return array;
+        }
+
+        var $startPage = $(".start-page");
+        var $quizContainer = $(".quiz-container");
+
+        var $mainContainer = $(".main-container");
+        var $scoreDisplay = $("#score");
+
+        var $minutesDisplay = $("#minutes");
+        var $secondsDisplay = $("#seconds");
+
+        var $answersContainer = $("#answersContainer");
+
+        var $response = $("#response");
+
+        var $nextQuestionBtn = $("#nextQuestionBtn");
+        var $checkAnswerBtn = $("#checkAnswerBtn");
+
+        var $audioPlayer = $("#audioPlayer");
+        var $audioIcon = $("#audioIcon");
+
+        var score = 0;
+        var currentQuestionIndex = 0;
+        var questionsCount = 10;
+        var userMistakeList = [];
+        var currentVowel = null;
+
+        var vowels = [
+            {
+                vowel: "i"
+              , audio: "vowels/i_Close_front_unrounded_vowel.mp3"
+              , link: "https://en.wikipedia.org/wiki/Close_front_unrounded_vowel"
+            }, {
+                vowel: "u"
+              , audio: "vowels/u_Close_back_rounded_vowel.mp3"
+              , link: "https://en.wikipedia.org/wiki/Close_back_rounded_vowel"
+            }, {
+                vowel: "o"
+              , audio: "vowels/o_Close-mid_back_rounded_vowel.mp3"
+              , link: "https://en.wikipedia.org/wiki/Close-mid_back_rounded_vowel"
+            }, {
+                vowel: "ə"
+              , audio: "vowels/ə_Mid-central_vowel.mp3"
+              , link: "https://en.wikipedia.org/wiki/mid_central_vowel"
+            }, {
+                vowel: "a"
+              , audio: "vowels/a_PR-open_front_unrounded_vowel.mp3"
+              , link: "https://en.wikipedia.org/wiki/Open_front_unrounded_vowel"
+            }, {
+                vowel: "ɛ"
+              , audio: "vowels/ɛ_Open-mid_front_unrounded_vowel.mp3"
+              , link: "https://en.wikipedia.org/wiki/Open-mid_front_unrounded_vowel"
+            }
+        ];
+
+        $audioIcon.click(() => $audioPlayer.play());
+
+        //#region Timer & modal window
+        
+        var $modal = $("#modal");
+        var closeModal = $(".close");
+
+        function openModal(text) {
+            $("#modalText").innerText = text;
+            $modal.style.display = "block";
+        }
+
+        closeModal.onclick = function () {
+            $modal.style.display = "none";
+        };
+
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                $modal.style.display = "none";
+            }
+        };
+
+        function countDown() {
+            let count = 600;
+
+            const timer = setInterval(function () {
+                count--;
+                $secondsDisplay.innerText = (count % 60).toString().length == 1 ? ('0' + (count % 60).toString()) : count % 60;
+
+                if (count % 60 == 0) {
+                    $minutesDisplay.innerText = Math.floor(count / 60);
+                    console.log(count / 60 + " minutes remained");
+                }
+
+                if (count === 60) {
+                    openModal("1 minute left!");
+                }
+
+                if (count == 0) {
+                    clearInterval(timer);
+                    openModal("Time is over!");
+                    setTimeout(() => document.location = String.Empty, 5000);
+                }
+
+            }, 1000);
+        }
+
+        //#endregion
+
+        function getRandomVowel() {
+            const randomIndex = Math.floor(Math.random() * vowels.length);
+
+            return vowels[randomIndex];
+        }
+
+        function checkAnswerHandle(currentVowel) {
+            const allAnswerBtns = $answersContainer.querySelectorAll(".answer");
+            const $checkedAnswerBtn = document.querySelector("#checked");
+
+            if (!$checkedAnswerBtn) {
+                $response.innerText = "Please select an answer!";
+                return;
+            }
+
+            $response.style.opacity = "1";
+            $response.removeAttribute('class');
+            $checkedAnswerBtn.removeAttribute("id");
+
+            if ($checkedAnswerBtn.textContent == currentVowel.vowel) {
+                $response.innerText = "Correct!";
+                $response.classList.add('correct');
+                score++;
+            } else {
+                $checkedAnswerBtn.classList.add("incorrect");
+                $response.innerHTML = `Incorrect! The correct answer was <a href="javascript:void(0)" onclick="getVowelLink('${currentVowel.link}')">${currentVowel.vowel}</a>.`;
+                $response.classList.add('incorrect');
+                
+                userMistakeList.push({
+                    correctVowel: currentVowel,
+                    userMistake: vowels.find(vowel => vowel.vowel == $checkedAnswerBtn.textContent)
+                });
+            }
+
+            allAnswerBtns.forEach(button => {
+                if (button.textContent == currentVowel.vowel) {
+                    button.classList.add("correct");
+                }
+
+                button.disabled = true;
+                button.style.pointerEvents = "none";
+            });
+
+            $scoreDisplay.innerHTML = score;
+
+            $checkAnswerBtn.disabled = true;
+            $checkAnswerBtn.style.display = "none";
+
+            $nextQuestionBtn.disabled = false;
+            $nextQuestionBtn.style.display = "block";
+        }
+
+        $checkAnswerBtn.addEventListener("click", function () {
+            checkAnswerHandle(currentVowel);
+        });
+
+        function getVowelLink(link) {
+            return window.open(link, '_blank', 'width=400px,height=600px,top=100px,left=500px');
+        }
+
+        function displayQuestion() {
+
+            if (currentQuestionIndex >= questionsCount) {
+                var $reloadQuizBtn = '<button type="button" class="button try-again" id="reloadQuiz"><i class="fa-solid fa-rotate-right"></i>&nbsp; Try again</button>';
+
+                $mainContainer.innerHTML = `<h1>Quiz Over!</h1><p>Your total score: <b>${score} / ${questionsCount}</b></p>${$reloadQuizBtn}`;
+
+                $mainContainer.classList.remove("main-container");
+                $mainContainer.classList.add("result-container");
+
+                var reloadQuizBtn = $("#reloadQuiz");
+
+                reloadQuizBtn.on("click", function () {
+                    document.location = String.Empty;
+                });
+
+                return;
+            }
+
+            $checkAnswerBtn.disabled = false;
+            $checkAnswerBtn.style.display = "block";
+            $checkAnswerBtn.style.pointerEvents = "All";
+
+            if (userMistakeList.length > 0) {
+                if (userMistakeList[0].userMistake) {
+                    currentVowel = userMistakeList[0].userMistake;
+                    userMistakeList[0].userMistake = null;
+                } else if (userMistakeList[0].correctVowel) {
+                    currentVowel = userMistakeList[0].correctVowel;
+                    userMistakeList.shift();
+                }
+            } else {
+                currentVowel = getRandomVowel();
+            }
+
+            $audioPlayer.src = currentVowel.audio;
+            $audioPlayer.play();
+
+            $response.style.opacity = "0";
+
+            $answersContainer.innerHTML = String.Empty;
+
+            $nextQuestionBtn.disabled = true;
+            $nextQuestionBtn.style.display = "none";
+
+            let answers = [currentVowel];
+
+            while (answers.length < 4) {
+                let randomVowel = getRandomVowel();
+
+                if (!answers.some(v => v.vowel == randomVowel.vowel)) {
+                    answers.push(randomVowel);
+                }
+            }
+
+            answers = swap(answers);
+
+            answers.forEach(vowel => {
+                let btn = document.createElement("button");
+
+                btn.classList.add("answer");
+                btn.textContent = vowel.vowel;
+
+                btn.click(function () {
+                    document.querySelectorAll(".answer").forEach(button => button.removeAttribute("id"));
+
+                    btn.id = "checked";
+                });
+
+                $answersContainer.appendChild(btn);
+            });
+
+            currentQuestionIndex++;
+        }
+
+        function startQuiz() {
+            $startPage.style.display = "none";
+            $quizContainer.style.display = "block";
+
+            countDown();
+            displayQuestion();
+        }
+
+        $("#startQuizBtn").click(startQuiz);
+
+        $nextQuestionBtn.click(displayQuestion);
+    </script>
+</body>
+
+</html>
